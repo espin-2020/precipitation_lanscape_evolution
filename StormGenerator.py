@@ -48,7 +48,7 @@ storm_dts = np.asanyarray(storm_dts)
 interstorm_dts = np.asanyarray(interstorm_dts)
 intensities = np.asanyarray(intensities)
 
-## Building a  time-series rainfall vector for all the total month.
+## Building a  time-series rainfall vector for the total month.
 rain_sequence = []
 for i in range(0,len(storm_dts)):
     storm = np.ones(int(np.round(storm_dts[i])))*intensities[i]
