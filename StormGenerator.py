@@ -58,6 +58,6 @@ for i in range(0,len(storm_dts)):
     
 ## Plotting the rainfall series
 plt.plot(rain_sequence)
-xlabel('Duration [min]')
-yalebl('Storm depth [?]')
+plt.xlabel('Duration [min]')
+plt.ylabel('Storm depth [?]')
     
