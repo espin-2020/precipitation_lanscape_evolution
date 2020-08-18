@@ -23,7 +23,7 @@ from landlab import imshow_grid_at_node
 
 
 ## Create Grid - !! later we can load a real ascii file
-mg = RasterModelGrid((4, 5))
+#mg = RasterModelGrid((4, 5))
 
 fname = 'hugo_site.asc'
 mg, z = read_esri_ascii(fname, name='topographic__elevation')
@@ -33,18 +33,18 @@ mg.status_at_node[np.isclose(z, -9999.)] = mg.BC_NODE_IS_CLOSED
 
 
 h = mg.add_ones("surface_water__depth", at="node")
-h *= 0.01
+h *= 0.01 # in meters
 #mg.add_zeros("topographic__elevation", at="node")
 d = mg.add_ones("soil_water_infiltration__depth", at="node",dtype = float)
-d *= 0.2
-HC = mg.ones('node')*1**-6
+d *= 0.2 # in meters
+HC = mg.ones('node')*1**-6  ## meter per sec
 
 ## Defiend param for the generator - i.e., rainfall scenario (Need to check the units)
-mean_duration = 200
-mean_inter_duration = 500 # in time steps
-mean_depth = 50
-total_time  = 300 #60*24*30 #60 min * 24 hours * 30 days
-delta_t = 1; # minutes
+mean_duration = 60*60*6
+mean_inter_duration = 60*60*10  #secound
+mean_depth = 0.5
+total_time  = 60*60*10 #secound
+delta_t = 10; # sec
 np.random.seed(np.arange(10))
 
 # Initialize generator
@@ -73,13 +73,15 @@ for (storm_dt, interstorm_dt) in precip.yield_storms():
     storm_elapsed_time = 0.
     total_elapsed_time = 0.
     last_storm_loop_tracker = 0.
-    total_mins_to_plot = storm_dt
+    total_sec_to_plot = storm_dt
     min_tstep_val = 1.  # necessary to get the model going cleanly
-    plot_interval_mins = 10
-    while total_elapsed_time < total_mins_to_plot :
-        #dt = of.calc_time_step() 
-        dt = 0.1
-        remaining_total_time = total_mins_to_plot  - total_elapsed_time
+    plot_interval_sec = 60*10
+    while total_elapsed_time < total_sec_to_plot :
+        
+        dt = of.calc_time_step()
+        print(dt)
+        dt = 22
+        remaining_total_time = total_sec_to_plot  - total_elapsed_time
         # if storm_elapsed_time < storm_dt * 6.:
         #     remaining_storm_time = storm_dt * 6. - storm_elapsed_time
         #     dt = min((dt, remaining_total_time, remaining_storm_time, min_tstep_val))
@@ -87,24 +89,24 @@ for (storm_dt, interstorm_dt) in precip.yield_storms():
         #     #dt = min((dt, remaining_total_time, min_tstep_val))
             
         
-        mg.at_node['surface_water__depth'] += mg.at_grid['rainfall__flux'] * dt
-        SI.run_one_step(dt=dt)
+        mg.at_node['surface_water__depth'] += mg.at_grid['rainfall__flux'] * dt # meters
+        SI.run_one_step(dt=dt) # 
         #print(mg.at_node['soil_water_infiltration__depth'])
         print(mg.at_node['surface_water__depth'])
-        of.run_one_step(dt=dt) 
+        of.run_one_step(dt=dt)  
         total_elapsed_time += dt
         storm_elapsed_time += dt
-        storm_loop_tracker = total_elapsed_time % (plot_interval_mins * 60.)
+        storm_loop_tracker = total_elapsed_time % (plot_interval_sec)
 
-        #if storm_loop_tracker < last_storm_loop_tracker:
-        if total_elapsed_time % 10 == 0:
-            plt.figure()
-            imshow_grid_at_node(
-                mg,
-                'surface_water__depth',
-                var_name='Stage (m)')
-            plt.title('Stage at t=' + str(total_elapsed_time//1) + 's')
-            plt.show()
+        # if storm_loop_tracker < last_storm_loop_tracker:
+        # #if total_elapsed_time % plot_interval_sec == 0:
+        #     plt.figure()
+        #     imshow_grid_at_node(
+        #         mg,
+        #         'surface_water__depth',
+        #         var_name='Stage (m)')
+        #     plt.title('Stage at t=' + str(total_elapsed_time//1) + 's')
+        #     plt.show()
             
         last_storm_loop_tracker = storm_loop_tracker
         outlet_depth.append(mg.at_node['surface_water__depth'][node_of_max_q])
