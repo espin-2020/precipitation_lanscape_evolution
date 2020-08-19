@@ -21,6 +21,8 @@ import seaborn as sns
 
 
 fname = 'hugo_site.asc'
+#fname = 'Tamrur_site.asc'
+
 mg, z = read_esri_ascii(fname, name='topographic__elevation')
 mg.status_at_node[mg.nodes_at_right_edge] = mg.BC_NODE_IS_FIXED_VALUE
 mg.status_at_node[np.isclose(z, -9999.)] = mg.BC_NODE_IS_CLOSED
