@@ -38,14 +38,16 @@ mg.at_node['surface_water__depth'].fill(1.e-12)  # a veneer of water stabilises 
 h *= 0.01
 d = mg.add_ones("soil_water_infiltration__depth", at="node", dtype=float)
 d *= 0.2
+
+## Initialization
 SI = SoilInfiltrationGreenAmpt(mg,hydraulic_conductivity=hydraulic_conductivity)
 of = OverlandFlow(mg, steep_slopes=True)
 
 ## Defiend param for the generator - i.e., rainfall scenario (Need to check the units)
-mean_duration = 5 #hours
-mean_inter_duration = 10  #hours
+mean_duration = 7 #hours
+mean_inter_duration = 20  #hours
 mean_depth = 0.5 # meters.
-total_time  = 10 #hours
+total_time  = 50 #hours
 delta_t = 1; # 
 np.random.seed(np.arange(10))
 
@@ -68,7 +70,7 @@ for (storm_t, interstorm_dt) in precip.yield_storms():
     storm_elapsed_time = 0.
     total_elapsed_time = 0.
     last_storm_loop_tracker = 0.
-    while total_elapsed_time < total_mins_to_plot * 60.:
+    while total_elapsed_time < total_mins_to_plot*60:
         dt = of.calc_time_step()
         remaining_total_time = total_mins_to_plot * 60. - total_elapsed_time
         if storm_elapsed_time < storm_t * 3600.:
