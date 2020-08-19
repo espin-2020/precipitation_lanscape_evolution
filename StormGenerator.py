@@ -40,11 +40,11 @@ d *= 0.2 # in meters
 HC = mg.ones('node')*1**-6  ## meter per sec
 
 ## Defiend param for the generator - i.e., rainfall scenario (Need to check the units)
-mean_duration = 60*60*6
-mean_inter_duration = 60*60*10  #secound
+mean_duration = 6 #hours
+mean_inter_duration = 20  #hours
 mean_depth = 0.5
-total_time  = 60*60*10 #secound
-delta_t = 10; # sec
+total_time  = 24*30 #hours
+delta_t = 1; # sec
 np.random.seed(np.arange(10))
 
 # Initialize generator
@@ -59,84 +59,17 @@ intensities = []
 storm_dts = []
 
 
-
-of = OverlandFlow(mg,steep_slopes=True)
-SI = SoilInfiltrationGreenAmpt(mg, hydraulic_conductivity = HC)
-
-
 node_of_max_q = 2126
 ## Iterating over all of the storms.
 for (storm_dt, interstorm_dt) in precip.yield_storms():
-    ## Get into a storm
-    outlet_depth = []
-    outlet_times = []
-    storm_elapsed_time = 0.
-    total_elapsed_time = 0.
-    last_storm_loop_tracker = 0.
-    total_sec_to_plot = storm_dt
-    min_tstep_val = 1.  # necessary to get the model going cleanly
-    plot_interval_sec = 60*10
-    while total_elapsed_time < total_sec_to_plot :
-        
-        dt = of.calc_time_step()
-        print(dt)
-        dt = 22
-        remaining_total_time = total_sec_to_plot  - total_elapsed_time
-        # if storm_elapsed_time < storm_dt * 6.:
-        #     remaining_storm_time = storm_dt * 6. - storm_elapsed_time
-        #     dt = min((dt, remaining_total_time, remaining_storm_time, min_tstep_val))
-        # #else:
-        #     #dt = min((dt, remaining_total_time, min_tstep_val))
-            
-        
-        mg.at_node['surface_water__depth'] += mg.at_grid['rainfall__flux'] * dt # meters
-        SI.run_one_step(dt=dt) # 
-        #print(mg.at_node['soil_water_infiltration__depth'])
-        print(mg.at_node['surface_water__depth'])
-        of.run_one_step(dt=dt)  
-        total_elapsed_time += dt
-        storm_elapsed_time += dt
-        storm_loop_tracker = total_elapsed_time % (plot_interval_sec)
-
-        # if storm_loop_tracker < last_storm_loop_tracker:
-        # #if total_elapsed_time % plot_interval_sec == 0:
-        #     plt.figure()
-        #     imshow_grid_at_node(
-        #         mg,
-        #         'surface_water__depth',
-        #         var_name='Stage (m)')
-        #     plt.title('Stage at t=' + str(total_elapsed_time//1) + 's')
-        #     plt.show()
-            
-        last_storm_loop_tracker = storm_loop_tracker
-        outlet_depth.append(mg.at_node['surface_water__depth'][node_of_max_q])
-        outlet_times.append(total_elapsed_time)    
-        
-
         ## Save rainfall data
-    intensities = mg.at_grid['rainfall__flux']
+    #intensities = mg.at_grid['rainfall__flux']
     storm_dts.append(np.array(storm_dt))
     interstorm_dts.append(interstorm_dt)
     intensities.append(mg.at_grid['rainfall__flux']) ## mm/minute
     
     
     
-    ## Here should come the Inflitration and Overlandflow components. 
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
 number_of_storms = str(len(storm_dts))
     
 ## This is ugly but just for now:    
